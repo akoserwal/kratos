@@ -43,7 +43,7 @@ func Recovery(opts ...Option) middleware.Middleware {
 	for _, o := range opts {
 		o(&op)
 	}
-	return func(handler middleware.Handler) middleware.Handler {
+	return func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			startTime := time.Now()
 			defer func() {

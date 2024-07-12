@@ -98,7 +98,7 @@ func Server(opts ...Option) middleware.Middleware {
 	for _, o := range opts {
 		o(&op)
 	}
-	return func(handler middleware.Handler) middleware.Handler {
+	return func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			// if requests and seconds are nil, return directly
 			if op.requests == nil && op.seconds == nil {
@@ -152,7 +152,7 @@ func Client(opts ...Option) middleware.Middleware {
 	for _, o := range opts {
 		o(&op)
 	}
-	return func(handler middleware.Handler) middleware.Handler {
+	return func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
 				code      int

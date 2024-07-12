@@ -4,8 +4,9 @@ import (
 	"context"
 )
 
-// Handler defines the handler invoked by Middleware.
-type Handler func(ctx context.Context, req interface{}) (interface{}, error)
+// LegacyHandler defines the handler invoked by Middleware.
+type LegacyHandler func(ctx context.Context, req interface{}) (interface{}, error)
+type Handler func(ctx context.Context, receiveMsg func(any) error, sendMsg func(msg any) error) error
 
 // Middleware is HTTP/gRPC transport middleware.
 type Middleware func(Handler) Handler

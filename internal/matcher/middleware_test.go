@@ -8,7 +8,7 @@ import (
 )
 
 func logging(module string) middleware.Middleware {
-	return func(handler middleware.Handler) middleware.Handler {
+	return func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			return module, nil
 		}

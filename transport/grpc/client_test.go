@@ -34,7 +34,7 @@ func TestWithTimeout(t *testing.T) {
 func TestWithMiddleware(t *testing.T) {
 	o := &clientOptions{}
 	v := []middleware.Middleware{
-		func(middleware.Handler) middleware.Handler { return nil },
+		func(middleware.LegacyHandler) middleware.LegacyHandler { return nil },
 	}
 	WithMiddleware(v...)(o)
 	if !reflect.DeepEqual(v, o.middleware) {
@@ -71,7 +71,7 @@ func TestWithTLSConfig(t *testing.T) {
 }
 
 func EmptyMiddleware() middleware.Middleware {
-	return func(handler middleware.Handler) middleware.Handler {
+	return func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			return handler(ctx, req)
 		}
