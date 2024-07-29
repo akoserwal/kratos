@@ -252,7 +252,7 @@ func TestHeaderFunc(t *testing.T) {
 	}
 }
 
-func testMiddleware(handler middleware.Handler) middleware.Handler {
+func testMiddleware(handler middleware.LegacyHandler) middleware.LegacyHandler {
 	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 		reply, err = handler(ctx, req)
 		return

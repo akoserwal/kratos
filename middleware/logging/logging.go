@@ -19,7 +19,7 @@ type Redacter interface {
 // Server is an server logging middleware.
 func Server(logger log.Logger) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, receiveMsg, sendMsg func(msg any) error, info CallInfo) (err error) {
 			var (
 				code      int32
 				reason    string
@@ -31,7 +31,19 @@ func Server(logger log.Logger) middleware.Middleware {
 				kind = info.Kind().String()
 				operation = info.Operation()
 			}
-			reply, err = handler(ctx, req)
+			var req any
+			var recv func(r any) error
+
+			if info.ClientStream {
+				recv = func(r any) error {return nil}
+			} else {
+				recv = func(r any) error {
+					req = r
+					return nil
+				}
+			}
+
+			err = handler(ctx, recv, func)
 			if se := errors.FromError(err); se != nil {
 				code = se.Code
 				reason = se.Reason
@@ -54,7 +66,7 @@ func Server(logger log.Logger) middleware.Middleware {
 
 // Client is a client logging middleware.
 func Client(logger log.Logger) middleware.Middleware {
-	return func(handler middleware.Handler) middleware.Handler {
+	return func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			var (
 				code      int32

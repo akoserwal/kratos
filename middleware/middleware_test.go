@@ -28,7 +28,7 @@ func TestChain(t *testing.T) {
 	}
 }
 
-func test1Middleware(handler Handler) Handler {
+func test1Middleware(handler LegacyHandler) LegacyHandler {
 	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 		fmt.Println("test1 before")
 		i++
@@ -38,7 +38,7 @@ func test1Middleware(handler Handler) Handler {
 	}
 }
 
-func test2Middleware(handler Handler) Handler {
+func test2Middleware(handler LegacyHandler) LegacyHandler {
 	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 		fmt.Println("test2 before")
 		i += 2
@@ -48,7 +48,7 @@ func test2Middleware(handler Handler) Handler {
 	}
 }
 
-func test3Middleware(handler Handler) Handler {
+func test3Middleware(handler LegacyHandler) LegacyHandler {
 	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 		fmt.Println("test3 before")
 		i += 3

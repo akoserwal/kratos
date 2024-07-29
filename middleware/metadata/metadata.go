@@ -49,7 +49,7 @@ func Server(opts ...Option) middleware.Middleware {
 	for _, o := range opts {
 		o(options)
 	}
-	return func(handler middleware.Handler) middleware.Handler {
+	return func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			tr, ok := transport.FromServerContext(ctx)
 			if !ok {
@@ -79,7 +79,7 @@ func Client(opts ...Option) middleware.Middleware {
 	for _, o := range opts {
 		o(options)
 	}
-	return func(handler middleware.Handler) middleware.Handler {
+	return func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			tr, ok := transport.FromClientContext(ctx)
 			if !ok {

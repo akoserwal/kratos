@@ -50,7 +50,7 @@ func Client(opts ...Option) middleware.Middleware {
 	for _, o := range opts {
 		o(opt)
 	}
-	return func(handler middleware.Handler) middleware.Handler {
+	return func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			info, _ := transport.FromClientContext(ctx)
 			breaker := opt.group.Get(info.Operation()).(circuitbreaker.CircuitBreaker)

@@ -27,7 +27,7 @@ type Context interface {
 	Header() http.Header
 	Request() *http.Request
 	Response() http.ResponseWriter
-	Middleware(middleware.Handler) middleware.Handler
+	Middleware(middleware.LegacyHandler) middleware.LegacyHandler
 	Bind(interface{}) error
 	BindVars(interface{}) error
 	BindQuery(interface{}) error
@@ -91,7 +91,7 @@ func (c *wrapper) Query() url.Values {
 }
 func (c *wrapper) Request() *http.Request        { return c.req }
 func (c *wrapper) Response() http.ResponseWriter { return c.res }
-func (c *wrapper) Middleware(h middleware.Handler) middleware.Handler {
+func (c *wrapper) Middleware(h middleware.LegacyHandler) middleware.LegacyHandler {
 	if tr, ok := transport.FromServerContext(c.req.Context()); ok {
 		return middleware.Chain(c.router.srv.middleware.Match(tr.Operation())...)(h)
 	}

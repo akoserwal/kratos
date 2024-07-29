@@ -31,13 +31,29 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 			ctx, cancel = context.WithTimeout(ctx, s.timeout)
 			defer cancel()
 		}
-		h := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return handler(ctx, req)
+
+		h := func(ctx context.Context, recv func(any) error, send func(msg any) error) error {
+			err := recv(req)
+			if err != nil {
+				return err
+			}
+
+			reply, err := handler(ctx, req)
+
+			if err != nil {
+				return err
+			}
+
+			return send(reply)
 		}
+
 		if next := s.middleware.Match(tr.Operation()); len(next) > 0 {
 			h = middleware.Chain(next...)(h)
 		}
-		reply, err := h(ctx, req)
+
+		var reply any
+		err := h(ctx, func(a any) error { return nil }, func(msg any) error { reply = msg; return nil })
+
 		if len(replyHeader) > 0 {
 			_ = grpc.SetHeader(ctx, replyHeader)
 		}
@@ -48,18 +64,38 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 // wrappedStream is rewrite grpc stream's context
 type wrappedStream struct {
 	grpc.ServerStream
-	ctx context.Context
+	ctx         context.Context
+	postSendMsg func(any) error
+	postRecvMsg func(any) error
 }
 
-func NewWrappedStream(ctx context.Context, stream grpc.ServerStream) grpc.ServerStream {
+func NewWrappedStream(ctx context.Context, stream grpc.ServerStream, postSendMsg func(any) error, postRecvMsg func(any) error) grpc.ServerStream {
 	return &wrappedStream{
 		ServerStream: stream,
 		ctx:          ctx,
+		postSendMsg:  postSendMsg,
+		postRecvMsg:  postRecvMsg,
 	}
 }
 
 func (w *wrappedStream) Context() context.Context {
 	return w.ctx
+}
+
+func (w *wrappedStream) SendMsg(m any) error {
+	if err := w.ServerStream.SendMsg(m); err != nil {
+		return err
+	}
+
+	return w.postSendMsg(m)
+}
+
+func (w *wrappedStream) RecvMsg(m any) error {
+	if err := w.ServerStream.RecvMsg(m); err != nil {
+		return err
+	}
+
+	return w.postRecvMsg(m)
 }
 
 // streamServerInterceptor is a gRPC stream server interceptor
@@ -76,9 +112,16 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 			replyHeader: headerCarrier(replyHeader),
 		})
 
-		ws := NewWrappedStream(ctx, ss)
+		h := func(ctx context.Context, recv func(any) error, send func(msg any) error) error {
+			ws := NewWrappedStream(ctx, ss, send, recv)
+			return handler(srv, ws)
+		}
 
-		err := handler(srv, ws)
+		if next := s.middleware.Match(info.FullMethod); len(next) > 0 {
+			h = middleware.Chain(next...)(h)
+		}
+
+		err := h(ctx, func(a any) error { return nil }, func(msg any) error { return nil })
 		if len(replyHeader) > 0 {
 			_ = grpc.SetHeader(ctx, replyHeader)
 		}

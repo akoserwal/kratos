@@ -245,7 +245,7 @@ func TestServer(t *testing.T) {
 				testToken, _ = FromContext(ctx)
 				return "reply", nil
 			}
-			var server middleware.Handler
+			var server middleware.LegacyHandler
 			if test.signingMethod != nil {
 				server = Server(func(token *jwt.Token) (interface{}, error) {
 					return []byte(test.key), nil
