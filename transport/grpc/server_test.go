@@ -73,7 +73,7 @@ func TestServer(t *testing.T) {
 	ctx = context.WithValue(ctx, testKey{}, "test")
 	srv := NewServer(
 		Middleware(
-			func(handler middleware.Handler) middleware.Handler {
+			func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 				return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 					if tr, ok := transport.FromServerContext(ctx); ok {
 						if tr.ReplyHeader() != nil {
@@ -118,7 +118,7 @@ func testClient(t *testing.T, srv *Server) {
 			func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 				return invoker(ctx, method, req, reply, cc, opts...)
 			}),
-		WithMiddleware(func(handler middleware.Handler) middleware.Handler {
+		WithMiddleware(func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 			return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 				if tr, ok := transport.FromClientContext(ctx); ok {
 					header := tr.RequestHeader()

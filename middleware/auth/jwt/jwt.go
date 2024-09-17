@@ -83,7 +83,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	for _, opt := range opts {
 		opt(o)
 	}
-	return func(handler middleware.Handler) middleware.Handler {
+	return func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			if header, ok := transport.FromServerContext(ctx); ok {
 				if keyFunc == nil {
@@ -137,7 +137,7 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	for _, opt := range opts {
 		opt(o)
 	}
-	return func(handler middleware.Handler) middleware.Handler {
+	return func(handler middleware.LegacyHandler) middleware.LegacyHandler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			if keyProvider == nil {
 				return nil, ErrNeedTokenProvider
